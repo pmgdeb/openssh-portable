@@ -86,6 +86,9 @@ static volatile pid_t sshpid = -1;
 /* Suppress diagnositic messages */
 int quiet = 0;
 
+/* Force diagnositic messages in batch mode */
+int loud = 0;
+
 /* This is set to 0 if the progressmeter is not desired. */
 int showprogress = 1;
 
@@ -2375,7 +2378,7 @@ main(int argc, char **argv)
 	infile = stdin;
 
 	while ((ch = getopt(argc, argv,
-	    "1246afhpqrvCc:D:i:l:o:s:S:b:B:F:P:R:")) != -1) {
+	    "1246afhpQqrvCc:D:i:l:o:s:S:b:B:F:P:R:")) != -1) {
 		switch (ch) {
 		/* Passed through to ssh(1) */
 		case '4':
@@ -2390,6 +2393,9 @@ main(int argc, char **argv)
 		case 'o':
 			addargs(&args, "-%c", ch);
 			addargs(&args, "%s", optarg);
+			break;
+		case 'Q':
+			loud = 1;
 			break;
 		case 'q':
 			ll = SYSLOG_LEVEL_ERROR;
@@ -2474,6 +2480,8 @@ main(int argc, char **argv)
 			usage();
 		}
 	}
+	if (batchmode && loud)
+		quiet = 0;
 
 	if (!isatty(STDERR_FILENO))
 		showprogress = 0;
